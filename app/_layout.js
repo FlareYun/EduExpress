@@ -1,7 +1,7 @@
 import React from 'react';
 import { View } from 'react-native';
 import { Slot  } from 'expo-router';
-import NavBar from '../components/NavBar'; // Import your bottom tab navigator
+import NavBar from '../components/NavBar'; 
 
 import "../global.css";
 
