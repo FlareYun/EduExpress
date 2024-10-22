@@ -2,6 +2,7 @@ import {React, useRef, useState } from 'react';
 import { View, TextInput, TouchableOpacity, FlatList, Text, Image, Linking } from 'react-native';
 import axios from 'axios';
 import { API_KEY } from '../config/API';
+import { useRouter } from 'expo-router';
 
 
 const SearchScreen = () => {
@@ -10,6 +11,7 @@ const SearchScreen = () => {
     const [nextPageToken, setNextPageToken] = useState('');
     const [loading, setLoading] = useState(false); 
     const textInputRef = useRef(null); 
+    const router = useRouter();
 
 
     const formatViews = (views) => {
@@ -98,9 +100,15 @@ const SearchScreen = () => {
         textInputRef.current.blur();
       };
 
+      const handleVideoSelect = (video) => {
+        router.push({
+          pathname: `/VideoDetail/`,
+          params: { id:video.id.videoId, videoTitle: video.snippet.title }, // Optional: Pass additional data
+        });
+      };
   const renderItem = ({ item }) => (
     <TouchableOpacity
-      onPress={() => Linking.openURL(`https://www.youtube.com/watch?v=${item.id.videoId}`)} 
+      onPress={() => handleVideoSelect(item)} 
       className="flex-row items-center mb-4"
     >
       <Image source={{ uri: item.snippet.thumbnails.default.url }} className="w-32 h-24 rounded-lg" />
