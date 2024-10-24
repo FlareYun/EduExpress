@@ -5,13 +5,13 @@ import { useRouter } from 'expo-router';
 
 const NavBar = () => {
   const router = useRouter();
-  const [activeTab, setActiveTab] = useState('/'); 
+  const [activeTab, setActiveTab] = useState('/AI'); 
 
   const tabs = [
     { name: 'Videos', icon: 'videocam', route: '/Videos' },
-    { name: 'AI', icon: 'chatbubbles', route: '/' },
+    { name: 'AI', icon: 'chatbubbles', route: '/AI' },
     { name: 'Forum', icon: 'people', route: '/Forum' },
-    { name: 'Profile', icon: 'person', route: '/Profile' },
+    // { name: 'Profile', icon: 'person', route: '/Profile' },
   ];
 
   return (
