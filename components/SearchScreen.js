@@ -2,7 +2,6 @@ import { React, useRef, useState } from 'react';
 import { View, TextInput, TouchableOpacity, FlatList, Text, Image } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import axios from 'axios';
-import { API_KEY } from '../config/API';
 import { useRouter } from 'expo-router';
 import { useAppContext } from '../app/AppContext'; 
 
@@ -21,7 +20,7 @@ const SearchScreen = () => {
               params: {
                   part: 'statistics,snippet', 
                   id: videoId,
-                  key: API_KEY,
+                  key: process.env.EXPO_PUBLIC_YTAPI_KEY,
               },
           });
           return response.data.items[0]; 
@@ -45,7 +44,7 @@ const SearchScreen = () => {
                         part: 'snippet',
                         q: query,
                         type: 'video',
-                        key: API_KEY,
+                        key: process.env.EXPO_PUBLIC_YTAPI_KEY,
                         maxResults: 5, 
                         pageToken: nextPageToken || '', 
                     },

@@ -4,24 +4,50 @@ import { View, TextInput, TouchableOpacity, Text, FlatList, KeyboardAvoidingView
 import { Ionicons } from '@expo/vector-icons'; 
 import {React, useState, useEffect} from 'react';
 import * as ImagePicker from 'expo-image-picker'; 
+import * as FileSystem from 'expo-file-system';
 import AnimatedGradientBox from '../components/AnimatedText';
 
-async function AIAnswer(message, imageUrl) {
+async function AIAnswer(message, imageData) {
   const url = "https://api-inference.huggingface.co/models/meta-llama/Llama-3.2-11B-Vision-Instruct/v1/chat/completions";
-  const apiKey = "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";
-  imageUrl="https://cdn.discordapp.com/attachments/651181429119778834/1298929176165879848/maxresdefault.png?ex=671b5990&is=671a0810&hm=fac76ce8ecd8ddf8c40ea3531c71150ed637e5bb48771fa91843d9296b7d098f&"
 
-  const data =  [{"type": "image_url", "image_url": {"url": imageUrl}}, { type: "text", text: message }] ;
 
-  if (imageUrl){
-      data.push({"type": "image_url", "image_url": {"url": imageUrl}});
+  const data =  [] ;
+
+  if (imageData){
+
+    const base64 =  await FileSystem.readAsStringAsync(imageData.uri, { encoding: 'base64' });
+
+
+      const headers = {
+        'Authorization': 'Client-ID '+process.env.EXPO_PUBLIC_CLIENTID,
+        'Content-Type': 'application/json',
+      };
+
+      const body = JSON.stringify({
+        image: base64,
+      });
+
+      const response = await fetch('https://api.imgur.com/3/image', {
+        method: 'POST',
+        headers: headers,
+        body: body,
+      });
+
+      const responseData = await response.json();
+
+
+    data.push({"type": "image_url", "image_url": {"url": responseData.data.link}});
   }
+
+  data.push({ type: "text", text: message });
+
+  console.log(data)
 
   const response = await fetch(url, {
       reactNative: { textStreaming: true },
     method: "POST",
     headers: {
-      Authorization: `Bearer ${apiKey}`,
+      Authorization: `Bearer ${process.env.EXPO_PUBLIC_API_KEY}`,
       "Content-Type": "application/json",
     },
     body: JSON.stringify({
@@ -89,20 +115,34 @@ const Chat = () => {
   });
 
   const handleSend = async () => {
-    if (inputText.trim()) {
+
+
+
 
       if (showIntro) setShowIntro(false);
 
       const newUserMessage = { id: Math.random().toString(), text: inputText, type: 'user' };
       setMessages((prevMessages) => [...prevMessages, newUserMessage]);
 
-      const aiResponse = await AIAnswer(inputText);
-      const newAIMessage = { id: Math.random().toString(), text: aiResponse, type: 'ai' };
-      setMessages((prevMessages) => [...prevMessages, newAIMessage]);
+      
+      const loadingMessage = { 
+        id: 'loading', 
+        text: 'Loading...', 
+        type: 'ai' 
+      };
+      setMessages((prevMessages) => [...prevMessages, loadingMessage]);
 
+
+      const aiResponse = await AIAnswer(inputText, selectedImage);
+      const newAIMessage = { id: Math.random().toString(), text: aiResponse, type: 'ai' };
+      setMessages((prevMessages) =>
+        prevMessages.map((msg) =>
+          msg.id === 'loading' ? newAIMessage : msg
+        )
+      );
+      
       setInputText('');
       setSelectedImage(null);
-    }
   };
 
   const pickImage = async () => {
@@ -115,7 +155,8 @@ const Chat = () => {
 
     const result = await ImagePicker.launchImageLibraryAsync();
     if (!result.canceled) {
-      setSelectedImage(result.assets[0].uri); 
+      console.log(result.assets[0])
+      setSelectedImage(result.assets[0]); 
     }
   };
 
@@ -162,7 +203,7 @@ const Chat = () => {
       {selectedImage && (
         <View className="relative mb-2">
           <Image
-            source={{ uri: selectedImage }}
+            source={{ uri: selectedImage.uri }}
             className="w-32 h-32 rounded-lg"
           />
           <TouchableOpacity

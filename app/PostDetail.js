@@ -80,7 +80,7 @@ const PostDetail = () => {
         data={comments}
         renderItem={({ item }) => (
           <View className={`p-2 border-b  border-gray-300 flex-row items-center justify-between ${item.marked ? 'bg-green-200' : ''} `}>
-            <Text className={`text-gray-600 `}>
+            <Text className={`text-gray-600 p-1`}>
               {item.text}
             </Text>
             {!item.marked && (
